@@ -40,7 +40,7 @@ module Google
   # This class manages APIs communication.
   class APIClient
     include Google::APIClient::Logging
-    
+
     ##
     # Creates a new Google API client.
     #
@@ -56,7 +56,7 @@ module Google
     #   </ul>
     # @option options [Boolean] :auto_refresh_token (true)
     #   The setting that controls whether or not the api client attempts to
-    #   refresh authorization when a 401 is hit in #execute. If the token does 
+    #   refresh authorization when a 401 is hit in #execute. If the token does
     #   not support it, this option is ignored.
     # @option options [String] :application_name
     #   The name of the application using the client.
@@ -77,7 +77,7 @@ module Google
     #   By default, a bundled set of trusted roots will be used.
     def initialize(options={})
       logger.debug { "#{self.class} - Initializing client with options #{options}" }
-      
+
       # Normalize key to String to allow indifferent access.
       options = options.inject({}) do |accu, (key, value)|
         accu[key.to_sym] = value
@@ -99,7 +99,7 @@ module Google
       end
       self.user_agent = options[:user_agent] || (
         "#{application_string} " +
-        "google-api-ruby-client/#{Google::APIClient::VERSION::STRING} #{ENV::OS_VERSION} (gzip)"
+        "google-api-ruby-client/#{Google::APIClient::VERSION::STRING} #{ENV::OS_VERSION.gsub("\n", " ")} (gzip)"
       ).strip
       # The writer method understands a few Symbols and will generate useful
       # default authentication mechanisms.
@@ -119,7 +119,7 @@ module Google
         faraday.ssl.ca_file = ca_file
         faraday.ssl.verify = true
         faraday.adapter Faraday.default_adapter
-      end      
+      end
       return self
     end
 
@@ -187,7 +187,7 @@ module Google
 
     ##
     # The setting that controls whether or not the api client attempts to
-    # refresh authorization when a 401 is hit in #execute. 
+    # refresh authorization when a 401 is hit in #execute.
     #
     # @return [Boolean]
     attr_accessor :auto_refresh_token
@@ -234,7 +234,7 @@ module Google
 
     ##
     # Number of times to retry on recoverable errors
-    # 
+    #
     # @return [FixNum]
     #  Number of retries
     attr_accessor :retries
@@ -433,7 +433,7 @@ module Google
     # Verifies an ID token against a server certificate. Used to ensure that
     # an ID token supplied by an untrusted client-side mechanism is valid.
     # Raises an error if the token is invalid or missing.
-    # 
+    #
     # @deprecated Use the google-id-token gem for verifying JWTs
     def verify_id_token!
       require 'jwt'
@@ -542,7 +542,7 @@ module Google
     #     - (TrueClass, FalseClass) :authenticated (default: true) -
     #       `true` if the request must be signed or somehow
     #       authenticated, `false` otherwise.
-    #     - (TrueClass, FalseClass) :gzip (default: true) - 
+    #     - (TrueClass, FalseClass) :gzip (default: true) -
     #       `true` if gzip enabled, `false` otherwise.
     #     - (FixNum) :retries -
     #       # of times to retry on recoverable errors
@@ -582,7 +582,7 @@ module Google
         options.update(params.shift) if params.size > 0
         request = self.generate_request(options)
       end
-      
+
       request.headers['User-Agent'] ||= '' + self.user_agent unless self.user_agent.nil?
       request.headers['Accept-Encoding'] ||= 'gzip' unless options[:gzip] == false
       request.headers['Content-Type'] ||= ''
@@ -592,8 +592,8 @@ module Google
       connection = options[:connection] || self.connection
       request.authorization = options[:authorization] || self.authorization unless options[:authenticated] == false
       tries = 1 + (options[:retries] || self.retries)
-      Retriable.retriable :tries => tries, 
-                          :on => [TransmissionError], 
+      Retriable.retriable :tries => tries,
+                          :on => [TransmissionError],
                           :interval => lambda {|attempts| (2 ** attempts) + rand} do
         result = request.send(connection, true)
 
@@ -664,7 +664,7 @@ module Google
       end
       return Addressable::Template.new(@base_uri + template).expand(mapping)
     end
-    
+
   end
 
 end
